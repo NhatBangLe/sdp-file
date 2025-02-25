@@ -14,15 +14,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.UUID;
 import org.springframework.context.MessageSource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.*;
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -98,18 +97,19 @@ public class StorageService {
     public Resource getResource(@NotNull @UUID String fileId)
             throws NoSuchElementException, FileProcessingException {
         var file = findById(fileId);
-        try {
-            return UrlResource.from(file.getSaveLocation());
-        } catch (UncheckedIOException e) {
-            log.error(e.getLocalizedMessage(), e);
-
-            var message = messageSource.getMessage(
-                    "file.cannot_read_saved_file",
-                    new Object[]{fileId},
-                    Locale.getDefault()
-            );
-            throw new FileProcessingException(message);
-        }
+        return new FileSystemResource(file.getSaveLocation());
+//        try {
+//            return UrlResource.from(file.getSaveLocation());
+//        } catch (UncheckedIOException e) {
+//            log.error(e.getLocalizedMessage(), e);
+//
+//            var message = messageSource.getMessage(
+//                    "file.cannot_read_saved_file",
+//                    new Object[]{fileId},
+//                    Locale.getDefault()
+//            );
+//            throw new FileProcessingException(message);
+//        }
     }
 
     @NotNull
