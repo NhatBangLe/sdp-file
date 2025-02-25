@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: sdp-file
+  messages:
+    basename: locales/messages
+  profiles:
+    active: ${PROFILE_ACTIVE:dev}
+  datasource:
+    url: jdbc:mysql://${DB_HOST}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  servlet:
+    multipart:
+      max-file-size: 128MB
+      max-request-size: 128MB
+  jpa:
+    open-in-view: false
+springdoc:
+  swagger-ui:
+    path: /docs
+  api-docs:
+    path: /api-docs
+  override-with-generic-response: false
+
+eureka:
+  instance:
+    appname: ${EUREKA_APP_NAME}
+    ip-address: ${EUREKA_IP_ADDR}
+    non-secure-port: ${EUREKA_PORT}
+    metadataMap:
+      zone: ${REGISTER_ZONE:}
+    prefer-ip-address: true
+  client:
+    preferSameZoneEureka: true
+    service-url:
+      defaultZone: ${DEFAULT_ZONE}
+app:
+  storage-dir: ./storage
+  external-host: ${EXTERNAL_HOST}

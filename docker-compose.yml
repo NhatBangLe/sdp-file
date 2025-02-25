@@ -1,0 +1,62 @@
+services:
+  mysql:
+    image: mysql:8.1
+    container_name: sdp-file-db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: sdp_file
+#    volumes:
+#      - db-data:/var/lib/mysql
+#    healthcheck:
+#      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+#      interval: 15s
+#      timeout: 15s
+#      retries: 3
+#    networks:
+#      - network
+#  file-service:
+#    container_name: sdp_file
+#    hostname: sdp_file
+#    ports:
+#      - "80:8080"
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#      args:
+#        EXPORT_FILE_DIR: ./resources # file will be exported to /sc-file/$EXPORT_FILE_DIR
+#    environment:
+#      DB_HOST: mysql:3306
+#      DB_USER: admin
+#      DB_PASSWORD: admin
+#      DB_NAME: sdp_file
+#      PROFILE_ACTIVE: test
+#      EUREKA_APP_NAME: file-service
+#      EUREKA_IP_ADDR: 127.0.0.1
+#      EUREKA_PORT: 80
+#      REGISTER_ZONE: service-registry-1
+#      DEFAULT_ZONE: http://admin:admin@service-registry:80/eureka/
+#      SWAGGER_SERVER_URL: http://gateway:80
+#      DOWNLOAD_HOST: http://gateway:80/api/file
+#    networks:
+#      - network
+#    volumes:
+#      - logs:/app/logs
+#      - resources:/app/resources
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#        restart: true
+#volumes:
+#  db-data:
+#    name: sdp-file-db
+#  resources:
+#    name: sdp-file-resources
+#  logs:
+#    name: sdp-file-logs
+#networks:
+#  network:
+#    name: sdp-net
