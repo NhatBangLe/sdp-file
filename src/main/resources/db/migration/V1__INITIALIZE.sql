@@ -36,7 +36,6 @@ CREATE TABLE IF NOT EXISTS sdp_file.folder
 (
     `id`         VARCHAR(36)                          NOT NULL,
     `name`       VARCHAR(255) CHARACTER SET 'utf8mb4' NOT NULL,
-    `bytes`      INT UNSIGNED                         NOT NULL,
     `created_at` DATETIME                             NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME                             NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     `USER_id`    VARCHAR(36)                          NOT NULL,

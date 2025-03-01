@@ -37,11 +37,6 @@ public class Folder implements Serializable {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @NotNull
-    @Builder.Default
-    @Column(name = "bytes", columnDefinition = "unsigned int not null")
-    private Long bytes = 0L;
-
     @CreatedDate
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")

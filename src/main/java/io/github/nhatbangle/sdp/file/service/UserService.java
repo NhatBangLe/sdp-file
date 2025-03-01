@@ -6,8 +6,6 @@ import io.github.nhatbangle.sdp.file.repository.UserRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.UUID;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -18,7 +16,6 @@ import java.util.NoSuchElementException;
 @Service
 @Validated
 @RequiredArgsConstructor
-@CacheConfig(cacheNames = "sdp_software-user")
 public class UserService {
 
     private final MessageSource messageSource;
@@ -50,7 +47,6 @@ public class UserService {
      * @param userId the id of the user
      * @throws ServiceUnavailableException if the authentication service is unavailable
      */
-    @Cacheable(cacheNames = "sdp_software-user-validate", key = "#userId")
     public boolean validateUserId(@NotNull @UUID String userId) throws ServiceUnavailableException {
         // call to authenticate-service
         return true;

@@ -91,6 +91,7 @@
     </dependencyManagement>
 
     <build>
+        <finalName>sdp-file</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

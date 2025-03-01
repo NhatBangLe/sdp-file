@@ -57,7 +57,6 @@ public class StorageService {
                         .name(userId)
                         .user(user)
                         .build());
-        folder.setBytes(folder.getBytes() + multipartFile.getSize());
 
         var file = repository.save(File.builder()
                 .originalName(multipartFile.getOriginalFilename())
@@ -72,7 +71,18 @@ public class StorageService {
         try {
             // create user folder
             var dir = storageDir.resolve(folder.getName());
-            if (!Files.isDirectory(dir)) Files.createDirectory(dir);
+            if (!Files.isDirectory(dir)) {
+                try {
+                    Files.createDirectory(dir);
+                } catch (FileAlreadyExistsException e) {
+                    var message = messageSource.getMessage(
+                            "file.duplicate_root_dir",
+                            new Object[]{dir},
+                            Locale.getDefault()
+                    );
+                    log.warn(message);
+                }
+            }
             // write file
             var bytes = multipartFile.getBytes();
             var newFile = Files.write(dir.resolve(fileId), bytes, StandardOpenOption.CREATE);
@@ -97,19 +107,20 @@ public class StorageService {
     public Resource getResource(@NotNull @UUID String fileId)
             throws NoSuchElementException, FileProcessingException {
         var file = findById(fileId);
-        return new FileSystemResource(file.getSaveLocation());
-//        try {
-//            return UrlResource.from(file.getSaveLocation());
-//        } catch (UncheckedIOException e) {
-//            log.error(e.getLocalizedMessage(), e);
-//
-//            var message = messageSource.getMessage(
-//                    "file.cannot_read_saved_file",
-//                    new Object[]{fileId},
-//                    Locale.getDefault()
-//            );
-//            throw new FileProcessingException(message);
-//        }
+        try {
+            var savedPath = Path.of(file.getSaveLocation());
+            var realPath = savedPath.getParent().resolve(file.getOriginalName());
+            Files.copy(realPath, savedPath, StandardCopyOption.REPLACE_EXISTING);
+
+            return new FileSystemResource(realPath);
+        } catch (IOException e) {
+            var message = messageSource.getMessage(
+                    "file.cannot_read_saved_file",
+                    new Object[]{fileId},
+                    Locale.getDefault()
+            );
+            throw new FileProcessingException(message);
+        }
     }
 
     @NotNull
