@@ -3,12 +3,10 @@ package io.github.nhatbangle.sdp.file.service;
 import io.github.nhatbangle.sdp.file.dto.FileMetadata;
 import io.github.nhatbangle.sdp.file.entity.File;
 import io.github.nhatbangle.sdp.file.entity.Folder;
-import io.github.nhatbangle.sdp.file.entity.User;
 import io.github.nhatbangle.sdp.file.exception.FileProcessingException;
 import io.github.nhatbangle.sdp.file.mapper.FileMapper;
 import io.github.nhatbangle.sdp.file.repository.FileRepository;
 import io.github.nhatbangle.sdp.file.repository.FolderRepository;
-import io.github.nhatbangle.sdp.file.repository.UserRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +15,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,7 +32,6 @@ import java.util.NoSuchElementException;
 public class StorageService {
 
     private final UserService userService;
-    private final UserRepository userRepository;
     private final FolderRepository folderRepository;
     private final MessageSource messageSource;
     private final FileRepository repository;
@@ -42,17 +40,13 @@ public class StorageService {
     private final Path storageDir;
 
     @NotNull
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public String store(
             @NotNull @UUID String userId,
             @NotNull MultipartFile multipartFile
     ) throws FileProcessingException, IllegalArgumentException {
-        var user = userRepository.findById(userId).orElseGet(() -> {
-            var result = userService.validateUserId(userId);
-            userService.foundOrElseThrow(userId, result);
-            return User.builder().id(userId).build();
-        });
-        var folder = folderRepository.findByUser_Id(userId)
+        var user = userService.getById(userId);
+        var folder = folderRepository.findRootFolderByUserId(userId)
                 .orElse(Folder.builder()
                         .name(userId)
                         .user(user)
@@ -99,7 +93,7 @@ public class StorageService {
                     new Object[]{},
                     Locale.getDefault()
             );
-            throw new FileProcessingException(message);
+            throw new FileProcessingException(message, e);
         }
     }
 
@@ -110,16 +104,19 @@ public class StorageService {
         try {
             var savedPath = Path.of(file.getSaveLocation());
             var realPath = savedPath.getParent().resolve(file.getOriginalName());
-            Files.copy(realPath, savedPath, StandardCopyOption.REPLACE_EXISTING);
 
+            if (Files.notExists(realPath))
+                Files.copy(savedPath, realPath, StandardCopyOption.REPLACE_EXISTING);
             return new FileSystemResource(realPath);
         } catch (IOException e) {
+            log.error(e.getLocalizedMessage(), e);
+
             var message = messageSource.getMessage(
                     "file.cannot_read_saved_file",
                     new Object[]{fileId},
                     Locale.getDefault()
             );
-            throw new FileProcessingException(message);
+            throw new FileProcessingException(message, e);
         }
     }
 
@@ -142,7 +139,7 @@ public class StorageService {
                     new Object[]{fileId},
                     Locale.getDefault()
             );
-            throw new FileProcessingException(message);
+            throw new FileProcessingException(message, e);
         }
     }
 

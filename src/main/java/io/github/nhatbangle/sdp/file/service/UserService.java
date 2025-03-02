@@ -8,10 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.UUID;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Locale;
-import java.util.NoSuchElementException;
 
 @Service
 @Validated
@@ -21,24 +21,15 @@ public class UserService {
     private final MessageSource messageSource;
     private final UserRepository repository;
 
-    /**
-     * Get a {@link User} by id
-     *
-     * @param userId the id of the user
-     * @return the user
-     * @throws NoSuchElementException if the user is not found
-     */
-    public User getById(@NotNull @UUID String userId)
-            throws NoSuchElementException {
-        return repository.findById(userId).orElseThrow(() -> {
-                    var message = messageSource.getMessage(
-                            "user.not_found",
-                            new Object[]{userId},
-                            Locale.getDefault()
-                    );
-                    return new NoSuchElementException(message);
-                }
-        );
+    @Transactional
+    public synchronized User getById(@NotNull @UUID String userId)
+            throws IllegalArgumentException, ServiceUnavailableException {
+        var optional = repository.findById(userId);
+        if (optional.isPresent()) return optional.get();
+
+        var validateResult = validateUserId(userId);
+        foundOrElseThrow(userId, validateResult);
+        return repository.save(User.builder().id(userId).build());
     }
 
     /**

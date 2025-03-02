@@ -54,7 +54,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(FileProcessingException.class)
     public String handleFileProcessingException(FileProcessingException e) {
-        log.warn(e.getLocalizedMessage(), e.getCause());
+        log.warn(e.getLocalizedMessage());
+        log.debug(e.getLocalizedMessage(), e.getCause());
         return e.getMessage();
     }
 
