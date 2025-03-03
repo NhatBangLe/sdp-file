@@ -9,6 +9,7 @@ import org.hibernate.validator.constraints.UUID;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,10 @@ public class StorageController {
 
     private final StorageService service;
 
-    @GetMapping("/{fileId}")
+    @GetMapping(
+            value = "/{fileId}",
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+    )
     @ResponseStatus(HttpStatus.OK)
     @Operation(description = "Get download URL")
     public ResponseEntity<Resource> getDownloadPath(@PathVariable @UUID String fileId) {
@@ -33,13 +37,20 @@ public class StorageController {
                 .body(file);
     }
 
-    @GetMapping("/{fileId}/metadata")
+    @GetMapping(
+            value = "/{fileId}/metadata",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     @ResponseStatus(HttpStatus.OK)
     public FileMetadata getMetadata(@PathVariable @UUID String fileId) {
         return service.getMetadata(fileId);
     }
 
-    @PostMapping("/{userId}")
+    @PostMapping(
+            value = "/{userId}",
+            produces = MediaType.TEXT_PLAIN_VALUE,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     @ResponseStatus(HttpStatus.CREATED)
     public String store(
             @PathVariable @UUID String userId,
