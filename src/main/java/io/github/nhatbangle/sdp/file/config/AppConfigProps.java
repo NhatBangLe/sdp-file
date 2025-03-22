@@ -10,6 +10,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AppConfigProps {
 
     private String storageDir;
-    private String externalHost;
 
 }

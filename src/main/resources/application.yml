@@ -22,7 +22,7 @@ springdoc:
     path: /api-docs
   override-with-generic-response: false
 
-eureka:
+#eureka:
 #  instance:
 #    appname: ${EUREKA_APP_NAME}
 #    ip-address: ${EUREKA_IP_ADDR}
@@ -30,10 +30,11 @@ eureka:
 #    metadataMap:
 #      zone: ${REGISTER_ZONE:}
 #    prefer-ip-address: true
-  client:
-    enabled: false
+#  client:
+#    enabled: false
 #    preferSameZoneEureka: true
 #    service-url:
 #      defaultZone: ${DEFAULT_ZONE}
+
 app:
   storage-dir: ./storage
