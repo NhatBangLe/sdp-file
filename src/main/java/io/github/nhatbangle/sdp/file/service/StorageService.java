@@ -4,6 +4,7 @@ import io.github.nhatbangle.sdp.file.dto.FileMetadata;
 import io.github.nhatbangle.sdp.file.entity.File;
 import io.github.nhatbangle.sdp.file.entity.Folder;
 import io.github.nhatbangle.sdp.file.exception.FileProcessingException;
+import io.github.nhatbangle.sdp.file.helper.JwtHelper;
 import io.github.nhatbangle.sdp.file.mapper.FileMapper;
 import io.github.nhatbangle.sdp.file.repository.FileRepository;
 import io.github.nhatbangle.sdp.file.repository.FolderRepository;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Locale;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -98,8 +100,20 @@ public class StorageService {
     }
 
     @NotNull
-    public Resource getResource(@NotNull @UUID String fileId)
+    public String generateDownloadUrl(@NotNull @UUID String fileId) {
+        return JwtHelper.createToken(Map.of("fileId", fileId));
+    }
+
+    @NotNull
+    public Resource getResource(@NotNull String signedToken)
             throws NoSuchElementException, FileProcessingException {
+        var claims = JwtHelper.getClaims(signedToken);
+        if (claims == null || !claims.containsKey("fileId")) {
+            var message = messageSource.getMessage("file.invalid_download_url", null, Locale.getDefault());
+            throw new IllegalArgumentException(message);
+        }
+
+        var fileId = claims.get("fileId", String.class);
         var file = findById(fileId);
         try {
             var savedPath = Path.of(file.getSaveLocation());

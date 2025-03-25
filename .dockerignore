@@ -1,3 +1,5 @@
 .idea
 .gitignore
 docker-compose.yml
+src/main/resources/application-dev.yml
+src/test

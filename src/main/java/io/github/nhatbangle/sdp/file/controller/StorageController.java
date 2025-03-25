@@ -6,11 +6,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.UUID;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,18 +20,11 @@ public class StorageController {
 
     private final StorageService service;
 
-    @GetMapping(
-            value = "/{fileId}",
-            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
-    )
+    @GetMapping(value = "/{fileId}")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(description = "Get download URL")
-    public ResponseEntity<Resource> getDownloadPath(@PathVariable @UUID String fileId) {
-        var file = service.getResource(fileId);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + file.getFilename() + "\"")
-                .body(file);
+    @Operation(description = "Generate file download URL")
+    public String generateDownloadUrl(@PathVariable @UUID String fileId) {
+        return service.generateDownloadUrl(fileId);
     }
 
     @GetMapping(
