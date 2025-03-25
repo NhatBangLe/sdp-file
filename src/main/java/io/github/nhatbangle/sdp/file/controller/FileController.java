@@ -2,7 +2,6 @@ package io.github.nhatbangle.sdp.file.controller;
 
 import io.github.nhatbangle.sdp.file.service.StorageService;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.validator.constraints.UUID;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,12 +19,12 @@ public class FileController {
     private final StorageService service;
 
     @GetMapping(
-            value = "/download/{signedToken}",
+            value = "/download/{generatedPath}",
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
     )
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Resource> getFile(@PathVariable @UUID String signedToken) {
-        var file = service.getResource(signedToken);
+    public ResponseEntity<Resource> getFile(@PathVariable String generatedPath) {
+        var file = service.getResource(generatedPath);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getFilename() + "\"")
